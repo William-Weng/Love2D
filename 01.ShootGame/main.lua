@@ -3,11 +3,13 @@
 
 -- LÖVE 11.3 / macOS 11.2.3
 -- 執行 => love ./
+-- [jf open 粉圓字型](https://justfont.com/huninn/)
 -- 遊戲進入點
 function love.load()
 
     FonSize = 40
-    GameFont = love.graphics.newFont(FonSize)
+    FontName = 'Font/jf-openhuninn-1.1.ttf'
+    GameFont = love.graphics.newFont(FontName, FonSize)
 
     Score = 0
     Timer = 0
@@ -56,14 +58,14 @@ function love.draw()
     love.graphics.setFont(GameFont)
 
     -- 印出分數
-    love.graphics.print('Score: '..Score, 5, 5)
+    love.graphics.print('分數: '..Score, 5, 5)
 
     -- 印時間 => 整數
-    love.graphics.print('Time: '..math.ceil(Timer), love.graphics.getWidth() / 2 - FonSize / 2 - 80, 0)
+    love.graphics.print('時間: '..math.ceil(Timer), love.graphics.getWidth() / 2 - FonSize / 2 - 80, 0)
 
     -- 印出開始的一開始的標題
     if GameOver then
-        love.graphics.printf('Click To Begin!', 0, 250, love.graphics.getWidth(), 'center')
+        love.graphics.printf('點這裡就開始了喲!', 0, 250, love.graphics.getWidth(), 'center')
     end
 
     -- 畫標靶 => 跟著Target移動
