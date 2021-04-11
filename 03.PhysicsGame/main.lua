@@ -2,8 +2,7 @@
 -- [love.physics.newWorld](https://love2d.org/wiki/love.physics.newWorld)
 -- [Animation library for LÖVE](https://love2d.org/wiki/anim8)
 -- [Tiled | Flexible level editor](https://www.mapeditor.org/)
--- [hump - Helper Utilities for Massive Progression](https://github.com/vrld/hump)
-
+-- [](https://love2d-community.github.io/love-api/)
 -- 65. Transitioning Between Levels
 
 -- MARK: - 生命週期
@@ -25,9 +24,14 @@ function love.update(deltaTime)
 end
 
 function love.draw()
+
+    love.graphics.draw(Sprite.background, 0, 0)
+
     Camera:attach()
         GameMap:drawLayer(GameMap.layers['Tile Layer 1'])   -- 載入地圖
-        World:draw()
+        
+        -- 不顯示外框
+        -- World:draw()
         PlayerDraw()
         EnemiesDraw()
     Camera:detach()
@@ -40,20 +44,12 @@ function love.keypressed(key)
         -- 不讓Player連續跳 (限制)
         if Player.isOnGround then
             Player:applyLinearImpulse(0, Player.speed.jump)
+            love.audio.play(Sound.jump)
         end
     end
 end
 
 function love.mousepressed(x, y, button)
-
-    -- if button == 1 then
-
-    --     local colliders = World:queryCircleArea(x, y, 200, { 'Platform', 'DangerZone' })
-
-    --     for index, collider in ipairs(colliders) do
-    --         collider:destroy()
-    --     end
-    -- end
 end
 
 -- MARK: 小工具
@@ -67,7 +63,6 @@ function InitSetting()
     InitAnim8()
     InitPlayer()
     InitPlatform()
-    -- InitDangerZone()
     InitSimpleTiledImplementation()
     InitHumpCamera()
 
@@ -76,12 +71,17 @@ function InitSetting()
 
     SaveData = {}
     SaveData.currentLevel = 'level1'
+    SaveData.filename = 'save.lua'
 
+    LoadGame()
     LoadMapObjects(SaveData.currentLevel)
+
+    PlaySound()
 end
 
 -- 載入模組
 function ImportModule()
+    require('Library.show')
     require('Module.module')
     require('Module.player')
     require('Module.sprite')
@@ -90,14 +90,29 @@ function ImportModule()
     require('Module.enemy')
 end
 
+-- [記錄遊戲 => 寫入檔案](https://love2d.org/wiki/love.filesystem.write)
+-- macOS: /Users/<user>/Library/Application Support/LOVE/lovegame
+function SaveGame(level)
+    SaveData.currentLevel = level
+    love.filesystem.write(SaveData.filename, table.show(SaveData, "SaveData"))
+end
+
+-- [載入遊戲 => 讀出檔案](https://love2d.org/wiki/love.filesystem.write)
+function LoadGame()
+
+    if love.filesystem.getInfo(SaveData.filename) then
+        local data = love.filesystem.load(SaveData.filename)
+        data()
+    end
+end
+
 -- 載入地圖相關物件
 function LoadMapObjects(level)
 
     MapDestroyAll()
     PlayerRestart()
 
-    SaveData.currentLevel = level
-
+    SaveGame(level)
     GameMap = SimpleTiledImplementation('Map/'..SaveData.currentLevel..'.lua')
 
     -- 載入地板物件
@@ -155,4 +170,17 @@ function ChangeLevel()
             LoadMapObjects('level1')
         end
     end
+end
+
+-- 放音樂
+function PlaySound()
+    
+    Sound = {}
+    Sound.music = love.audio.newSource("Sound/music.mp3", "stream")
+    Sound.jump = love.audio.newSource("Sound/jump.wav", "static")
+
+    -- 播放背景音樂
+    Sound.music:setLooping(true)
+    Sound.music:setVolume(0.5)
+    love.audio.play(Sound.music)
 end
