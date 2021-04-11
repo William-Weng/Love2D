@@ -71,3 +71,8 @@ function PlayerDraw()
     local x, y = Player:getPosition()
     Player.animation:draw(Sprite.playerSheet, x, y, nil, 0.25 * Player.direction, 0.25, 130, 300)  -- 0.25是Player的大小比例
 end
+
+-- Player一開始的位置
+function PlayerRestart()
+    Player:setPosition(300, 100)
+end
